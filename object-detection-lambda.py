@@ -67,7 +67,7 @@ def get_config(config_path):
 
 
 
-def load_model(configpath,weightspath):
+def load_model(configpath, weightspath):
     # load our YOLO object detector trained on COCO dataset (80 classes)
     print("[INFO] loading YOLO from disk...")
     net = cv2.dnn.readNetFromDarknet(configpath, weightspath)
@@ -75,7 +75,11 @@ def load_model(configpath,weightspath):
 
 
 
-def do_prediction(image,net,LABELS):
+def do_prediction(image, net, LABELS):
+    
+    # construct the argument parse and parse the arguments
+    confthres = 0.3
+    nmsthres = 0.1
 
     (H, W) = image.shape[:2]
     # determine only the *output* layer names that we need from YOLO
@@ -154,45 +158,4 @@ def do_prediction(image,net,LABELS):
             objects[i]["rectangle"]["width"] = boxes[i][2]
             objects_arr.append(objects[i])
     return objects_arr
-    import json
-import urllib.parse
-import boto3
-
-print('Loading function')
-
-s3 = boto3.client('s3')
-
-
-def lambda_handler(event, context):
-    #print("Received event: " + json.dumps(event, indent=2))
-
-    # Get the image object from the s3 upload event 
-    image_bucket = event['Records'][0]['s3']['bucket']['name']
-    image_key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     
-    # Get yolo tiny configs
-    yolo_bucket = 'yolo-tiny-configs-bucket'
-    labels_key = "coco.names"
-    cfg_key = "yolov3-tiny.cfg"
-    weights_key = "yolov3-tiny.weights"
-    
-    try:
-        lables_object = s3.get_object(Bucket=yolo_bucket, Key=labels_key)
-        cfg_object = s3.get_object(Bucket=yolo_bucket, Key=cfg_key)
-        weights_object = s3.get_object(Bucket=yolo_bucket, Key=weights_key)
-        
-        # Image uploaded to S3 Bucket
-        image_response = s3.get_object(Bucket=image_bucket, Key=image_key)
-        print("CONTENT TYPE: " + image_response['ContentType'])
-        return image_response['ContentType']
-        
-        
-        
-        # Image sent via HTTP Request Body
-        
-    
-    except Exception as e:
-        print(e)
-        print('Error getting object {} from bucket {}. Make sure they exist and your bucket is in the same region as this function.'.format(key, bucket))
-        raise e
-
