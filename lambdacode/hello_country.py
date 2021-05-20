@@ -2,8 +2,7 @@ import json
 import datetime
 import requests
 def lambda_handler(event, context):
-  print ('event: ')
-  print (event)
+  print ('event:' + event)
   data = {
     'output': 'Hello from ' + event['Country'],
     'timestamp': datetime.datetime.utcnow().isoformat()
