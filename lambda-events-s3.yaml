@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Test Pipeline Lambda
+Resources:
+  hellofunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: hello_country.lambda_handler
+      Runtime: python3.8
+      CodeUri: ./lambdacode/hello_country.py
+      Description: Sample SAM Lambda Deployment
+      Events:
+        S3Event:
+          Type: S3
+          Properties:
+            Bucket: !Ref S3bucket
+            Events: s3:ObjectCreated:*
+  S3bucket:
+    Type: AWS::S3::Bucket
